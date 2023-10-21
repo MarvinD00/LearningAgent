@@ -28,13 +28,13 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                tetrimino.move_left()
+                tetrimino_controller.move_left()
             elif event.key == pygame.K_d:
-                tetrimino.move_right()
+                tetrimino_controller.move_right()
             elif event.key == pygame.K_LEFT:
-                tetrimino.move_left()
+                tetrimino_controller.move_left()
             elif event.key == pygame.K_RIGHT:
-                tetrimino.move_right()
+                tetrimino_controller.move_right()
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("purple")
