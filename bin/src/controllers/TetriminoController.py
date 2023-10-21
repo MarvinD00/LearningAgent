@@ -8,7 +8,7 @@ class TetriminoController:
         self.tetrimino = tetrimino
         self.screen = screen
         self.last_fall_time = pygame.time.get_ticks()
-        self.fall_interval = 1000
+        self.fall_interval = 250
         self.block_grid = []
 
         # Initialize the block grid
@@ -17,23 +17,23 @@ class TetriminoController:
                 [None] * (self.screen.get_width() // self.tetrimino.block_size))
 
     def move_left(self):
+        self.tetrimino.draw(self.screen)
         if all(self.is_valid_move(block.rect.x - self.tetrimino.block_size, block.rect.y) for block in self.tetrimino.blocks):
             self.tetrimino.move("left")
-            self.tetrimino.draw(self.screen)
 
     def move_right(self):
+        self.tetrimino.draw(self.screen)
         if all(self.is_valid_move(block.rect.x + self.tetrimino.block_size, block.rect.y) for block in self.tetrimino.blocks):
             self.tetrimino.move("right")
-            self.tetrimino.draw(self.screen)
 
     def move_down(self):
+        self.tetrimino.draw(self.screen)
         if all(self.is_valid_move(block.rect.x, block.rect.y + self.tetrimino.block_size) for block in self.tetrimino.blocks):
             current_time = pygame.time.get_ticks()
             if current_time - self.last_fall_time >= self.fall_interval:
                 print("move down")
                 self.last_fall_time = current_time
                 self.tetrimino.move_down()
-            self.tetrimino.draw(self.screen)
 
     def is_valid_move(self, x, y):
         # Check if the move would cause a collision with the boundaries or other blocks
