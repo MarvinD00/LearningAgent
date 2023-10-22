@@ -29,12 +29,15 @@ class GameController:
                         self.tetrimino_controller.move_left()
                     elif event.key == pygame.K_RIGHT:
                         self.tetrimino_controller.move_right()
-            self.tetrimino_controller.move_down()
+                if event.type == TetriminoController.STOP_MOVE_EVENT:
+                    self.tetrimino_controller.new_tetrimino()
 
             # fill the screen with a color to wipe away anything from last frame
             self.screen.fill("purple")
 
             # every second move down
+            # and draw
+            self.tetrimino_controller.draw()
             self.tetrimino_controller.move_down()
 
             # flip() the display to put your work on screen
