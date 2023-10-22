@@ -1,11 +1,19 @@
 import numpy as np
+from TetriminoController import TetriminoController
+from ..Objects import Tetrimino as Tetrimino
+import pygame
+
+# Basic constructors for the agent to work with
+screen = pygame.display.set_mode((400, 720))
+t = Tetrimino(0,0)
+tc = TetriminoController(screen, t)
 
 class Agent:
 
     def __init__(self):
         self.action_space = np.array([0,1,2]) # 0: move left, 1: move right, 2: rotate
-        self.observation_space = ... # FIXME: Implement the observation space.
-        self.state = ... # FIXME: State not implemented
+        self.observation_space = np.zeros(shape=(400, 720))
+        self.state = tc.block_grid
         # self.memory = np.array([[0,0,0]]) TODO: Might be important later.
 
     def step(self, action) -> tuple:
@@ -20,6 +28,14 @@ class Agent:
         -
         step: tuple -> (action, reward, state)
         """
+        match action:
+            case 0:
+                tc.move_left()
+            case 1:
+                tc.move_right()
+            case 2:
+                pass
+
         pass # TODO: Implement what the agent does and calculate the reward
 
     def reset(self) -> None:
