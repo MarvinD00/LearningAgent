@@ -2,6 +2,7 @@ import pygame
 from ..Objects import Tetrimino as Tetrimino
 
 STOP_MOVE_EVENT = pygame.USEREVENT + 1
+END_GAME_EVENT = pygame.USEREVENT + 2
 
 
 class TetriminoController:
@@ -75,8 +76,14 @@ class TetriminoController:
     def new_tetrimino(self):
         self.landed_tetriminos.append(self.tetrimino)
         self.tetrimino = Tetrimino.Tetrimino(0, 0)
+        if self.is_game_over():
+            pygame.event.post(pygame.event.Event(END_GAME_EVENT))
 
     def draw(self):
         self.tetrimino.draw(self.screen)
         for tetrimino in self.landed_tetriminos:
             tetrimino.draw(self.screen)
+
+    def is_game_over(self):
+        # Check if the top row of the grid contains any filled cells
+        return any(cell is not None for cell in self.block_grid[0])

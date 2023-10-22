@@ -18,7 +18,7 @@ class GameController:
             # poll for events
             # pygame.QUIT event means the user clicked X to close your window
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == pygame.QUIT or event.type == TetriminoController.END_GAME_EVENT:
                     return False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
