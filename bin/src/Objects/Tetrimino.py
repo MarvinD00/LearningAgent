@@ -26,12 +26,10 @@ class Tetrimino(pygame.sprite.Sprite):
         self.y = y
         self.color = get_random_color()
         self.shape = get_random_shape()
+        self.current_rotation = 0
 
-        for relative_pos in self.shape:
-            for coord in relative_pos:
-                block_x = x + coord[0] * Block.BLOCK_SIZE
-                block_y = y + coord[1] * Block.BLOCK_SIZE
-                self.blocks.append(Block.Block(self.color, block_x, block_y))
+        # Initialize with the first shape
+        self.set_shape(self.shape[self.current_rotation])
 
     def draw(self, screen):
         for block in self.blocks:
@@ -61,5 +59,17 @@ class Tetrimino(pygame.sprite.Sprite):
             block.rect.y += Block.BLOCK_SIZE
 
     def rotate(self):
-        # rotate the shape
-        pass
+        # Increment the rotation index to switch to the next rotation.
+        self.current_rotation = (self.current_rotation + 1) % len(self.shape)
+
+        # Update the blocks based on the new rotation.
+        self.set_shape(self.shape[self.current_rotation])
+
+    def set_shape(self, shape):
+        # Clear the existing blocks
+        self.blocks = []
+
+        for relative_pos in shape:
+            block_x = self.x + relative_pos[0] * Block.BLOCK_SIZE
+            block_y = self.y + relative_pos[1] * Block.BLOCK_SIZE
+            self.blocks.append(Block.Block(self.color, block_x, block_y))

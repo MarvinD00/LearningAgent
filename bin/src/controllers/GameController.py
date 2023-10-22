@@ -29,6 +29,10 @@ class GameController:
                         self.tetrimino_controller.move_left()
                     elif event.key == pygame.K_RIGHT:
                         self.tetrimino_controller.move_right()
+                    elif event.key == pygame.K_w:
+                        self.tetrimino_controller.rotate()
+                    elif event.key == pygame.K_UP:
+                        self.tetrimino_controller.rotate()
                 if event.type == TetriminoController.STOP_MOVE_EVENT:
                     self.tetrimino_controller.new_tetrimino()
 

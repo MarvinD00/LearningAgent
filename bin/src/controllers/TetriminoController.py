@@ -36,6 +36,11 @@ class TetriminoController:
                 self.last_fall_time = current_time
                 self.tetrimino.move_down()
 
+    def rotate(self):
+        self.update_block_grid()
+        if all(self.is_valid_move(block.rect.x, block.rect.y) for block in self.tetrimino.blocks):
+            self.tetrimino.rotate()
+
     def is_valid_move(self, x, y):
         # Check if the move would cause a collision with the boundaries or other blocks
         for block in self.tetrimino.blocks:
