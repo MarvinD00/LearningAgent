@@ -12,6 +12,10 @@ class GameController:
         self.clock = pygame.time.Clock()
         self.running = True
         self.run()
+        self.score = 0
+        self.myfont = pygame.font.Font(None, 30)
+        # render text
+        self.label = self.myfont.render("Some text!", 1, (255, 255, 0))
 
     def run(self):
         while self.running:
@@ -38,6 +42,16 @@ class GameController:
 
             # fill the screen with a color to wipe away anything from last frame
             self.screen.fill("purple")
+
+            # every second increase score by 10
+            if self.dt > 1:
+                self.score += 10
+                self.label = self.myfont.render(
+                    "Score: " + str(self.score), 1, (255, 255, 0))
+                self.dt = 0
+
+            # draw label
+#            self.screen.blit(self.label, (0, 0))
 
             # every second move down
             # and draw
