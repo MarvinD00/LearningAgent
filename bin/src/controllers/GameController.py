@@ -13,9 +13,9 @@ class GameController:
         self.running = True
         self.run()
         self.score = 0
-        self.myfont = pygame.font.Font(None, 30)
+        # self.myfont = pygame.font.Font(None, 30)
         # render text
-        self.label = self.myfont.render("Some text!", 1, (255, 255, 0))
+        # self.label = self.myfont.render("Some text!", 1, (255, 255, 0))
 
     def run(self):
         while self.running:
@@ -51,7 +51,9 @@ class GameController:
                 self.dt = 0
 
             # draw label
-#            self.screen.blit(self.label, (0, 0))
+            self.myfont = pygame.font.Font(None, 30)
+            self.label = self.myfont.render("Some text!", 1, (255, 255, 0))
+            self.screen.blit(self.label, (0, 0))
 
             # every second move down
             # and draw

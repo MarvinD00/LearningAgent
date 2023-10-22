@@ -31,10 +31,13 @@ class Agent:
         match action:
             case 0:
                 tc.move_left()
+                reward = 0
             case 1:
                 tc.move_right()
             case 2:
                 pass
+        
+        return (action, reward, self.state)
 
         pass # TODO: Implement what the agent does and calculate the reward
 
