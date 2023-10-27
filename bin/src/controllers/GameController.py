@@ -29,6 +29,10 @@ class GameController:
                         self.tetrimino_controller.move_left()
                     elif event.key == pygame.K_RIGHT:
                         self.tetrimino_controller.move_right()
+                    elif event.key == pygame.K_s:
+                        self.tetrimino_controller.move_down()
+                    elif event.key == pygame.K_DOWN:
+                        self.tetrimino_controller.move_down()
                     elif event.key == pygame.K_w:
                         self.tetrimino_controller.rotate()
                     elif event.key == pygame.K_UP:
@@ -39,23 +43,23 @@ class GameController:
             # fill the screen with a color to wipe away anything from last frame
             self.screen.fill("purple")
 
-            # every second increase score by 10
-            if self.dt > 1:
+            # every second increase score by 10 and move down
+            self.dt += 1
+            if self.dt >= 60:
                 self.score += 10
+                self.dt = 0
+                self.tetrimino_controller.move_down()
                 self.label = self.myfont.render(
                     "Score: " + str(self.score), 1, (255, 255, 0))
-                self.dt = 0
-
             # draw label
             # render text
             self.myfont = pygame.font.Font(None, 30)
-            self.label = self.myfont.render(f"Score: {self.score}", 1, (255, 255, 0))
+            self.label = self.myfont.render(
+                f"Score: {self.score}", 1, (255, 255, 0))
             self.screen.blit(self.label, (0, 0))
 
-            # every second move down
-            # and draw
+            # every second move down and draw
             self.tetrimino_controller.draw()
-            self.tetrimino_controller.move_down()
 
             # flip() the display to put your work on screen
             pygame.display.flip()

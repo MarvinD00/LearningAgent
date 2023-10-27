@@ -13,7 +13,6 @@ class TetriminoController:
         self.last_fall_time = pygame.time.get_ticks()
         self.fall_interval = 250
         self.block_grid = []
-        self.landed_tetriminos = []
 
         # Initialize the block grid
         for i in range(self.screen.get_height() // self.tetrimino.block_size):
@@ -29,16 +28,11 @@ class TetriminoController:
             self.tetrimino.move("right")
 
     def move_down(self):
-        self.update_block_grid()
+        print("move down")
         if all(self.is_valid_move(block.rect.x, block.rect.y + self.tetrimino.block_size) for block in self.tetrimino.blocks):
-            current_time = pygame.time.get_ticks()
-            if current_time - self.last_fall_time >= self.fall_interval:
-                print("move down")
-                self.last_fall_time = current_time
-                self.tetrimino.move_down()
+            self.tetrimino.move("down")
 
     def rotate(self):
-        self.update_block_grid()
         if all(self.is_valid_move(block.rect.x, block.rect.y) for block in self.tetrimino.blocks):
             self.tetrimino.rotate()
 
@@ -48,10 +42,10 @@ class TetriminoController:
             if (x >= self.screen.get_width()):
                 return False
             if (y >= self.screen.get_height()
-                    or self.block_grid[y // self.tetrimino.block_size][x // self.tetrimino.block_size] is not None
-                    ):
+                or self.block_grid[y // self.tetrimino.block_size][x // self.tetrimino.block_size] is not None
+                ):
                 print("landed")
-                pygame.event.post(pygame.event.Event(STOP_MOVE_EVENT))
+                self.land()
                 return False
             if (
                 x < 0
@@ -60,30 +54,72 @@ class TetriminoController:
         return True
 
     def update_block_grid(self):
-        # Clear the old position of the Tetrimino's blocks in the grid
-        for row in range(len(self.block_grid)):
-            for col in range(len(self.block_grid[row])):
-                if self.block_grid[row][col] in self.tetrimino.blocks:
-                    self.block_grid[row][col] = None
-
-        # Update the game grid with the new position of the Tetrimino's blocks
-        for tetrimino in self.landed_tetriminos:
-            for block in tetrimino.blocks:
-                row = block.rect.y // self.tetrimino.block_size
-                col = block.rect.x // self.tetrimino.block_size
-                self.block_grid[row][col] = block
+        print("update block grid")
+        # add self.tetrimino to block grid
+        for block in self.tetrimino.blocks:
+            self.block_grid[block.rect.y // self.tetrimino.block_size][block.rect.x //
+                                                                       self.tetrimino.block_size] = block
 
     def new_tetrimino(self):
-        self.landed_tetriminos.append(self.tetrimino)
-        self.tetrimino = Tetrimino.Tetrimino(0, 0)
+        print("new tetrimino")
+        self.tetrimino = Tetrimino.Tetrimino(
+            self.screen.get_width() // 2, 0)
         if self.is_game_over():
             pygame.event.post(pygame.event.Event(END_GAME_EVENT))
 
     def draw(self):
         self.tetrimino.draw(self.screen)
-        for tetrimino in self.landed_tetriminos:
-            tetrimino.draw(self.screen)
+        for row in self.block_grid:
+            for block in row:
+                if block is not None:
+                    block.draw(self.screen)
 
     def is_game_over(self):
         # Check if the top row of the grid contains any filled cells
         return any(cell is not None for cell in self.block_grid[0])
+
+    def remove_full_rows(self):
+        removed_rows = []
+        for row in range(len(self.block_grid) - 1, -1, -1):
+            if all(cell is not None for cell in self.block_grid[row]):
+                removed_rows.append(row)
+
+        for row in removed_rows:
+            for col in range(len(self.block_grid[row])):
+                self.block_grid[row][col] = None
+        return removed_rows
+
+    def move_blocks_down(self):
+        for row in reversed(range(len(self.block_grid) - 1)):
+            for col in range(len(self.block_grid[row])):
+                block = self.block_grid[row][col]
+                if block is not None:
+                    new_row = row
+                    while (new_row < len(self.block_grid) - 1 and self.block_grid[new_row + 1][col] is None):
+                        # Move the block down in the grid
+                        self.block_grid[new_row + 1][col] = block
+                        self.block_grid[new_row][col] = None
+                        # Update the block's position
+                        block.rect.y += self.tetrimino.block_size
+                        new_row += 1
+                    print("Block moved down")
+
+    def land(self):
+        pygame.event.post(pygame.event.Event(STOP_MOVE_EVENT))
+        self.update_block_grid()
+        self.debug_block_grid()
+        row = self.remove_full_rows()
+        self.debug_block_grid()
+        if (row):
+            self.move_blocks_down()
+        self.debug_block_grid()
+
+    def debug_block_grid(self):
+        for row in self.block_grid:
+            for block in row:
+                if (block is not None):
+                    print("blok ", end="")
+                else:
+                    print("none ", end="")
+            print("")
+        print("")
