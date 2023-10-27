@@ -31,14 +31,24 @@ class GameController:
                         self.tetrimino_controller.move_right()
                     elif event.key == pygame.K_s:
                         self.tetrimino_controller.move_down()
+                        self.score += 5
                     elif event.key == pygame.K_DOWN:
                         self.tetrimino_controller.move_down()
+                        self.score += 5
                     elif event.key == pygame.K_w:
                         self.tetrimino_controller.rotate()
                     elif event.key == pygame.K_UP:
                         self.tetrimino_controller.rotate()
                 if event.type == TetriminoController.STOP_MOVE_EVENT:
                     self.tetrimino_controller.new_tetrimino()
+                if event.type == TetriminoController.TETRIS_EVENT:
+                    self.score += 100
+                if event.type == TetriminoController.TETRIS_COMBO_DOUBLE_EVENT:
+                    self.score += 250
+                if event.type == TetriminoController.TETRIS_COMBO_TRIPLE_EVENT:
+                    self.score += 400
+                if event.type == TetriminoController.TETRIS_COMBO_QUADRUPLE_EVENT:
+                    self.score += 600
 
             # fill the screen with a color to wipe away anything from last frame
             self.screen.fill("purple")

@@ -3,7 +3,10 @@ from ..Objects import Tetrimino as Tetrimino
 
 STOP_MOVE_EVENT = pygame.USEREVENT + 1
 END_GAME_EVENT = pygame.USEREVENT + 2
-
+TETRIS_EVENT = pygame.USEREVENT + 3
+TETRIS_COMBO_DOUBLE_EVENT = pygame.USEREVENT + 4
+TETRIS_COMBO_TRIPLE_EVENT = pygame.USEREVENT + 5
+TETRIS_COMBO_QUADRUPLE_EVENT = pygame.USEREVENT + 6
 
 class TetriminoController:
 
@@ -108,10 +111,18 @@ class TetriminoController:
         pygame.event.post(pygame.event.Event(STOP_MOVE_EVENT))
         self.update_block_grid()
         self.debug_block_grid()
-        row = self.remove_full_rows()
+        rows = self.remove_full_rows()
         self.debug_block_grid()
-        if (row):
+        if (rows):
             self.move_blocks_down()
+        if(len(rows) == 1):
+            pygame.event.post(pygame.event.Event(TETRIS_EVENT))
+        elif(len(rows) == 2):
+            pygame.event.post(pygame.event.Event(TETRIS_COMBO_DOUBLE_EVENT))
+        elif(len(rows) == 3):
+            pygame.event.post(pygame.event.Event(TETRIS_COMBO_TRIPLE_EVENT))
+        elif(len(rows) == 4):
+            pygame.event.post(pygame.event.Event(TETRIS_COMBO_QUADRUPLE_EVENT))
         self.debug_block_grid()
 
     def debug_block_grid(self):
