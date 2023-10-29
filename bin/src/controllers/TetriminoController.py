@@ -22,19 +22,25 @@ class TetriminoController:
         for i in range(self.screen.get_height() // self.tetrimino.block_size):
             self.block_grid.append(
                 [None] * (self.screen.get_width() // self.tetrimino.block_size))
+        for i in range(self.screen.get_height() // self.tetrimino.block_size):
+            self.cur_block_grid_pos.append(
+                [None] * (self.screen.get_width() // self.tetrimino.block_size))
 
     def move_left(self):
         if all(self.is_valid_move(block.rect.x - self.tetrimino.block_size, block.rect.y) for block in self.tetrimino.blocks):
             self.tetrimino.move("left")
+            self.update_cur_pos()
 
     def move_right(self):
         if all(self.is_valid_move(block.rect.x + self.tetrimino.block_size, block.rect.y) for block in self.tetrimino.blocks):
             self.tetrimino.move("right")
+            self.update_cur_pos()
 
     def move_down(self):
         print("move down")
         if all(self.is_valid_move(block.rect.x, block.rect.y + self.tetrimino.block_size) for block in self.tetrimino.blocks):
             self.tetrimino.move("down")
+            self.update_cur_pos()
         else:
             print("landed")
             self.land()
@@ -44,6 +50,7 @@ class TetriminoController:
         self.tetrimino.rotate()
         if all(self.is_valid_move(block.rect.x, block.rect.y) for block in self.tetrimino.blocks):
             # If the rotation is valid, keep the rotation
+            self.update_cur_pos()
             return
         else:
             # If the rotation is not valid, revert the rotation
@@ -64,20 +71,26 @@ class TetriminoController:
                 return False
         return True
 
+    def update_cur_pos(self):
+        for _ in self.cur_block_grid_pos:
+            for block in _:
+                block = None
+        for block in self.tetrimino.blocks:
+            self.cur_block_grid_pos[block.rect.y // self.tetrimino.block_size][block.rect.x //
+                                                                        self.tetrimino.block_size] = block
+
     def update_block_grid(self):
         print("update block grid")
-        self.cur_block_grid_pos = []
         # add self.tetrimino to block grid
         for block in self.tetrimino.blocks:
             self.block_grid[block.rect.y // self.tetrimino.block_size][block.rect.x //
-                                                                       self.tetrimino.block_size] = block
-            self.cur_block_grid_pos[block.rect.y // self.tetrimino.block_size][block.rect.x //
                                                                        self.tetrimino.block_size] = block
         
     def new_tetrimino(self):
         print("new tetrimino")
         self.tetrimino = Tetrimino.Tetrimino(
             self.screen.get_width() // 2, 0)
+        self.update_cur_pos()
         if self.is_game_over():
             pygame.event.post(pygame.event.Event(END_GAME_EVENT))
 

@@ -1,6 +1,7 @@
 import pygame
 from . import TetriminoController
-
+from . import AgentController as ac
+import random
 
 class GameController:
 
@@ -11,14 +12,21 @@ class GameController:
         self.clock = pygame.time.Clock()
         self.running = True
         self.score = 0
+        self.lastScore = 0
+        self.Agent = ac.Agent()
         self.run()
 
     def run(self):
         while self.running:
+            self.Agent.block_grid = self.tetrimino_controller.block_grid
+            self.Agent.cur_block_grid_pos = self.tetrimino_controller.cur_block_grid_pos
             # poll for events
             # pygame.QUIT event means the user clicked X to close your window
             for event in pygame.event.get():
-                if event.type == pygame.QUIT or event.type == TetriminoController.END_GAME_EVENT:
+                if event.type == TetriminoController.END_GAME_EVENT:
+                    self.Agent.reset()
+                    self.reset()
+                if event.type == pygame.QUIT:
                     return False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
@@ -49,6 +57,10 @@ class GameController:
                     self.score += 400
                 if event.type == TetriminoController.TETRIS_COMBO_QUADRUPLE_EVENT:
                     self.score += 600
+                if event.type == ac.GET_REWARD_EVENT:
+                    self.Agent.reward = self.score - self.lastScore
+                    self.lastScore = self.score                    
+
 
             # fill the screen with a color to wipe away anything from last frame
             self.screen.fill("purple")
@@ -61,6 +73,7 @@ class GameController:
                 self.tetrimino_controller.move_down()
                 self.label = self.myfont.render(
                     "Score: " + str(self.score), 1, (255, 255, 0))
+                print(self.Agent.get_q_table())
             # draw label
             # render text
             self.myfont = pygame.font.Font(None, 30)
@@ -74,7 +87,19 @@ class GameController:
             # flip() the display to put your work on screen
             pygame.display.flip()
 
+            #step
+            self.Agent.step(random.choice(self.Agent.action_space))
+                
             # limits FPS to 60
             # dt is delta time in seconds since last frame, used for framerate-
             # independent physics.
             dt = self.clock.tick(60) / 1000
+
+    def reset(self):
+        self.tetrimino_controller = TetriminoController.TetriminoController(self.screen)
+        self.dt = 0
+        self.clock = pygame.time.Clock()        
+        self.running = True
+        self.score = 0
+        self.lastScore = 0
+        self.run()
