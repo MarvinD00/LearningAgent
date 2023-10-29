@@ -16,6 +16,7 @@ class TetriminoController:
         self.last_fall_time = pygame.time.get_ticks()
         self.fall_interval = 200
         self.block_grid = []
+        self.cur_block_grid_pos = []
 
         # Initialize the block grid
         for i in range(self.screen.get_height() // self.tetrimino.block_size):
@@ -65,11 +66,14 @@ class TetriminoController:
 
     def update_block_grid(self):
         print("update block grid")
+        self.cur_block_grid_pos = []
         # add self.tetrimino to block grid
         for block in self.tetrimino.blocks:
             self.block_grid[block.rect.y // self.tetrimino.block_size][block.rect.x //
                                                                        self.tetrimino.block_size] = block
-
+            self.cur_block_grid_pos[block.rect.y // self.tetrimino.block_size][block.rect.x //
+                                                                       self.tetrimino.block_size] = block
+        
     def new_tetrimino(self):
         print("new tetrimino")
         self.tetrimino = Tetrimino.Tetrimino(
