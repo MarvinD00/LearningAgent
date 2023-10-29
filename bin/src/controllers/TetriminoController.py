@@ -41,7 +41,7 @@ class TetriminoController:
     def rotate(self):
         # Temporarily rotate the tetrimino to check if the rotation is valid
         self.tetrimino.rotate()
-        if all(self.is_valid_rotation(block.rect.x, block.rect.y) for block in self.tetrimino.blocks):
+        if all(self.is_valid_move(block.rect.x, block.rect.y) for block in self.tetrimino.blocks):
             # If the rotation is valid, keep the rotation
             return
         else:
