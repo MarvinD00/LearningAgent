@@ -3,6 +3,7 @@ from TetriminoController import TetriminoController
 from ..Objects import Tetrimino as Tetrimino
 import pygame
 from GameController import GameController
+from Agent import ObservationSpace
 
 # Basic constructors for the agent to work with
 screen = pygame.display.set_mode((400, 720))
@@ -13,8 +14,8 @@ gc = GameController(screen)
 class Agent:
 
     def __init__(self):
-        self.action_space = np.array(["left", "right", "rotate"]) # 0: move left, 1: move right, 2: rotate
-        self.observation_space = np.zeros(shape=(400, 720))
+        self.action_space = np.array(["left", "right", "rotate", "down"]) # 0: move left, 1: move right, 2: rotate
+        self.observation_space = ObservationSpace(gc.block_grid, gc.tetrimino_controller.tetrimino)
         self.state = gc.score
         self.ALPHA = 0.5
         self.QVALUE = 0
@@ -36,19 +37,24 @@ class Agent:
         """
         match action:
             case "left":
-                tc.move_left()
+                pygame.event.post(pygame.event.Event(pygame.K_a))
                 self.sequence.append((gc.dt, 0))
                 reward = gc.score
                 self.qvalues[self.curStep][0] = reward
             case "right":
-                tc.move_right()
+                pygame.event.post(pygame.event.Event(pygame.K_d))
                 self.sequence.append((gc.dt, 1))
                 reward = gc.score
                 self.qvalues[self.curStep][1] = reward
             case "rotate":
-                self.sequence.append((gc.dt, 2))
+                pygame.event.post(pygame.event.Event(pygame.K_w))
                 reward = gc.score
                 self.qvalues[self.curStep][2] = reward
+            case "down":
+                pygame.event.post(pygame.event.Event(pygame.K_s))
+                reward = gc.score
+                self.qvalues[self.curStep][3] = reward
+
         
         return (action, reward, self.state)
 
