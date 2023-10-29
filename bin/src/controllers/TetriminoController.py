@@ -14,7 +14,7 @@ class TetriminoController:
         self.tetrimino = tetrimino
         self.screen = screen
         self.last_fall_time = pygame.time.get_ticks()
-        self.fall_interval = 250
+        self.fall_interval = 200
         self.block_grid = []
 
         # Initialize the block grid
@@ -34,10 +34,19 @@ class TetriminoController:
         print("move down")
         if all(self.is_valid_move(block.rect.x, block.rect.y + self.tetrimino.block_size) for block in self.tetrimino.blocks):
             self.tetrimino.move("down")
-
+        else:
+            print("landed")
+            self.land()
+            
     def rotate(self):
-        if all(self.is_valid_move(block.rect.x, block.rect.y) for block in self.tetrimino.blocks):
-            self.tetrimino.rotate()
+        # Temporarily rotate the tetrimino to check if the rotation is valid
+        self.tetrimino.rotate()
+        if all(self.is_valid_rotation(block.rect.x, block.rect.y) for block in self.tetrimino.blocks):
+            # If the rotation is valid, keep the rotation
+            return
+        else:
+            # If the rotation is not valid, revert the rotation
+            self.tetrimino.unrotate()
 
     def is_valid_move(self, x, y):
         # Check if the move would cause a collision with the boundaries or other blocks
@@ -47,8 +56,6 @@ class TetriminoController:
             if (y >= self.screen.get_height()
                 or self.block_grid[y // self.tetrimino.block_size][x // self.tetrimino.block_size] is not None
                 ):
-                print("landed")
-                self.land()
                 return False
             if (
                 x < 0

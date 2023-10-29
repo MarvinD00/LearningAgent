@@ -65,6 +65,13 @@ class Tetrimino(pygame.sprite.Sprite):
         # Update the blocks based on the new rotation.
         self.set_shape(self.shape[self.current_rotation])
 
+    def unrotate(self):
+        # Decrement the rotation index to switch to the previous rotation.
+        self.current_rotation = (self.current_rotation - 1) % len(self.shape)
+
+        # Update the blocks based on the new rotation.
+        self.set_shape(self.shape[self.current_rotation])
+
     def set_shape(self, shape):
         # Clear the existing blocks
         self.blocks = []
