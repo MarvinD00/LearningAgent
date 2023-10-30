@@ -37,12 +37,10 @@ class TetriminoController:
             self.update_cur_pos()
 
     def move_down(self):
-        print("move down")
         if all(self.is_valid_move(block.rect.x, block.rect.y + self.tetrimino.block_size) for block in self.tetrimino.blocks):
             self.tetrimino.move("down")
             self.update_cur_pos()
         else:
-            print("landed")
             self.land()
             
     def rotate(self):
@@ -80,14 +78,12 @@ class TetriminoController:
                                                                         self.tetrimino.block_size] = block
 
     def update_block_grid(self):
-        print("update block grid")
         # add self.tetrimino to block grid
         for block in self.tetrimino.blocks:
             self.block_grid[block.rect.y // self.tetrimino.block_size][block.rect.x //
                                                                        self.tetrimino.block_size] = block
         
     def new_tetrimino(self):
-        print("new tetrimino")
         self.tetrimino = Tetrimino.Tetrimino(
             self.screen.get_width() // 2, 0)
         self.update_cur_pos()
@@ -129,14 +125,11 @@ class TetriminoController:
                         # Update the block's position
                         block.rect.y += self.tetrimino.block_size
                         new_row += 1
-                    print("Block moved down")
 
     def land(self):
         pygame.event.post(pygame.event.Event(STOP_MOVE_EVENT))
         self.update_block_grid()
-        self.debug_block_grid()
         rows = self.remove_full_rows()
-        self.debug_block_grid()
         if (rows):
             self.move_blocks_down()
         if(len(rows) == 1):
@@ -147,7 +140,6 @@ class TetriminoController:
             pygame.event.post(pygame.event.Event(TETRIS_COMBO_TRIPLE_EVENT))
         elif(len(rows) == 4):
             pygame.event.post(pygame.event.Event(TETRIS_COMBO_QUADRUPLE_EVENT))
-        self.debug_block_grid()
 
     def debug_block_grid(self):
         for row in self.block_grid:

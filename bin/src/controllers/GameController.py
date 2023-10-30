@@ -27,6 +27,7 @@ class GameController:
                     self.Agent.reset()
                     self.reset()
                 if event.type == pygame.QUIT:
+                    self.Agent.write_q_table()
                     return False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
@@ -98,7 +99,6 @@ class GameController:
     def reset(self):
         self.tetrimino_controller = TetriminoController.TetriminoController(self.screen)
         self.dt = 0
-        self.clock = pygame.time.Clock()        
         self.running = True
         self.score = 0
         self.lastScore = 0

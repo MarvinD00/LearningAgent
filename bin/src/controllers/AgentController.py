@@ -13,8 +13,7 @@ class Agent:
         self.QVALUE = 0
         self.reward = 0
         self.q_table_length = 1000
-        self.q_table = pd.DataFrame({"State":np.zeros(self.q_table_length), "moveLeft":np.zeros(self.q_table_length), "moveRight":np.zeros(self.q_table_length), "moveDown":np.zeros(self.q_table_length), "rotate":np.zeros(self.q_table_length)})
-        self.q_table.index = self.q_table["State"]
+        self.q_table = pd.DataFrame(columns=["moveLeft", "moveRight", "moveDown", "rotate"], index=["State"])
         self.cur_step = 0
         self.cur_block_grid_pos = []
         self.block_grid = []
@@ -35,18 +34,16 @@ class Agent:
         match action:
             case "left":
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_a, 'mod': 0, 'unicode': 'a'}))
-                self.q_table["moveLeft"][self.getState()] = self.reward
+                self.update_q_table(self.getState(), "moveLeft", self.reward)
             case "right":
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_d, 'mod': 0, 'unicode': 'd'})) 
-                self.q_table["moveRight"][self.getState()] = self.reward
+                self.update_q_table(self.getState(), "moveRight", self.reward)
             case "rotate":
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_w, 'mod': 0, 'unicode': 'w'}))
-                self.q_table["rotate"][self.getState()] = self.reward
+                self.update_q_table(self.getState(), "rotate", self.reward)
             case "down":
                 pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_s, 'mod': 0, 'unicode': 's'}))
-                self.q_table["moveDown"][self.getState()] = self.reward
-        #setze state auf current state
-        self.q_table["State"][self.getState()] = self.getState()
+                self.update_q_table(self.getState(), "moveDown", self.reward)
         return action
 
     def reset(self) -> None:
@@ -63,6 +60,15 @@ class Agent:
     def getReward(self, reward):
         self.QVALUE = self.QVALUE + self.ALPHA * (reward + max(self.q_table) - self.QVALUE)
 
+    def update_q_table(self, state, action, reward):
+        if state not in self.q_table.index:
+            # if state not in q table -> add a new row
+            new_row = pd.Series([0] * (len(self.q_table.columns)), name=state, index=self.q_table.columns)
+            self.q_table = pd.concat([self.q_table, new_row.to_frame().T])
+
+        # update q value
+        self.q_table.at[state, action] = reward
+
     def getState(self):
         b = 0
         for row in self.block_grid:
@@ -75,7 +81,10 @@ class Agent:
                 b = b << 1
                 if block is not None:
                     b = b | 1
-        return b
+        return str(b)
     
     def get_q_table(self):
         return self.q_table
+    
+    def write_q_table(self):
+        self.q_table.to_csv("q_table.csv")
