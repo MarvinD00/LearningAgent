@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import pygame
-# from Agent import ObservationSpace
 
 GET_REWARD_EVENT = pygame.USEREVENT + 7
 RESET_GAME_EVENT = pygame.USEREVENT + 8
@@ -63,15 +62,6 @@ class Agent:
 
     def getReward(self, reward):
         self.QVALUE = self.QVALUE + self.ALPHA * (reward + max(self.q_table) - self.QVALUE)
-    
-    # def update_q_table(self):
-    #     self.q_table = pd.concat([self.q_table, pd.DataFrame({"State":[self.getState()],
-    #                                                         "moveLeft":[self.getReward(self.reward)],
-    #                                                         "moveRight":[self.getReward(self.reward)], 
-    #                                                         "moveDown":[self.getReward(self.reward)],
-    #                                                         "rotate":[self.getReward(self.reward)]}
-    #                                                         )
-    #                             ])
 
     def getState(self):
         b = 0
