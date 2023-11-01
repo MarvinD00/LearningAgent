@@ -1,5 +1,6 @@
 import pygame
 from ..Objects import Tetrimino as Tetrimino
+import numpy as np
 
 STOP_MOVE_EVENT = pygame.USEREVENT + 1
 END_GAME_EVENT = pygame.USEREVENT + 2
@@ -17,6 +18,7 @@ class TetriminoController:
         self.fall_interval = 200
         self.block_grid = []
         self.cur_block_grid_pos = []
+        self.block_grid_arr = np.array([[0 for i in range (10)] for j in range (18)])
 
         # Initialize the block grid
         for i in range(self.screen.get_height() // self.tetrimino.block_size):
@@ -25,6 +27,7 @@ class TetriminoController:
         for i in range(self.screen.get_height() // self.tetrimino.block_size):
             self.cur_block_grid_pos.append(
                 [None] * (self.screen.get_width() // self.tetrimino.block_size))
+            
 
     def move_left(self):
         if all(self.is_valid_move(block.rect.x - self.tetrimino.block_size, block.rect.y) for block in self.tetrimino.blocks):
@@ -76,6 +79,13 @@ class TetriminoController:
         for block in self.tetrimino.blocks:
             self.cur_block_grid_pos[block.rect.y // self.tetrimino.block_size][block.rect.x //
                                                                         self.tetrimino.block_size] = block
+        # put all blocks into block_grid_arr as 1
+        for i in range(len(self.block_grid)):
+            for j in range(len(self.block_grid[i])):
+                if self.block_grid[i][j] is not None:
+                    self.block_grid_arr[i][j] = 1
+                else:
+                    self.block_grid_arr[i][j] = 0
 
     def update_block_grid(self):
         # add self.tetrimino to block grid

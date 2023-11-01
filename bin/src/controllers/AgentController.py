@@ -1,90 +1,97 @@
 import numpy as np
 import pandas as pd
 import pygame
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+import random
 
-GET_REWARD_EVENT = pygame.USEREVENT + 7
-RESET_GAME_EVENT = pygame.USEREVENT + 8
+# define the model
+model = Sequential()
+model.add(Dense(32, input_shape=(10,18), activation="relu"))
+model.add(Dense(32, activation="relu"))
+model.add(Dense(18, activation="linear")) 
+model.compile(loss="mse", optimizer="adam", metrics=["accuracy"])
 
+# define the agent
 class Agent:
 
-    def __init__(self):
-        self.action_space = np.array(["left", "right", "rotate", "down"])
-        self.ALPHA = 0.5
-        self.QVALUE = 0
-        self.reward = 0
-        self.q_table_length = 1000
-        self.q_table = pd.DataFrame(columns=["moveLeft", "moveRight", "moveDown", "rotate"], index=["State"])
-        self.cur_step = 0
-        self.cur_block_grid_pos = []
-        self.block_grid = []
+    def __init__(self, env):
+        self.is_training = True
+        self.env = env
+        self.memory = []
+        self.gamma = 0.95
+        self.epsilon = 1.0
+        self.epsilon_decay = 0.995
+        self.epsilon_min = 0.01
+        self.batch_size = 32
+        self.train_start = 1000
 
-    def step(self, action) -> tuple:
-        """
-        Proceeds the action chosen by the agent.
+    def act(self, state):
+        if np.random.rand() <= self.epsilon:
+            return random.choice(self.env.action_space)
+        else:
+            return np.argmax(model.predict(state))
 
-        Parameters
-        -
-        action: int -> random value of self.action_space
+    def remember(self, state, action, reward, next_state, done):
+        self.memory.append((state, action, reward, next_state, done))
 
-        Returns
-        -
-        reward: tuple -> (action, reward, state)
-        """
-        pygame.event.post(pygame.event.Event(GET_REWARD_EVENT))
-        match action:
-            case "left":
-                pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_a, 'mod': 0, 'unicode': 'a'}))
-                self.update_q_table(self.getState(), "moveLeft", self.reward)
-            case "right":
-                pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_d, 'mod': 0, 'unicode': 'd'})) 
-                self.update_q_table(self.getState(), "moveRight", self.reward)
-            case "rotate":
-                pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_w, 'mod': 0, 'unicode': 'w'}))
-                self.update_q_table(self.getState(), "rotate", self.reward)
-            case "down":
-                pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_s, 'mod': 0, 'unicode': 's'}))
-                self.update_q_table(self.getState(), "moveDown", self.reward)
-        return action
+    def train(self):
+        if len(self.memory) < self.train_start:
+            return
+        batch_size = min(self.batch_size, len(self.memory))
+        mini_batch = random.sample(self.memory, batch_size)
+        update_input = np.zeros((batch_size, 10, 18))
+        update_target = np.zeros((batch_size, 10, 18))
+        
+        for i in range(batch_size):
+            state, action, reward, next_state, done = mini_batch[i]
+            target = reward
 
-    def reset(self) -> None:
-        """
-        Resets the environment to the default settings.
+            if not done:
+                target = (reward + self.gamma * np.amax(model.predict(next_state)))
 
-        Returns
-        -
-        None
-        """
-        self.QVALUE = 0
-        self.cur_step = 0
+            update_input[i] = state
+            update_target[i] = model.predict(state)
+            position = np.where(self.env.action_space == action)[0]
+            update_target[i][position] = target
 
-    def getReward(self, reward):
-        self.QVALUE = self.QVALUE + self.ALPHA * (reward + max(self.q_table) - self.QVALUE)
+        model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
 
-    def update_q_table(self, state, action, reward):
-        if state not in self.q_table.index:
-            # if state not in q table -> add a new row
-            new_row = pd.Series([0] * (len(self.q_table.columns)), name=state, index=self.q_table.columns)
-            self.q_table = pd.concat([self.q_table, new_row.to_frame().T])
+        # Decay epsilon
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+        
+    def load(self, name):
+        model.load_weights(name)
 
-        # update q value
-        self.q_table.at[state, action] = reward
-
-    def getState(self):
-        b = 0
-        for row in self.block_grid:
-            for block in row:
-                b = b << 1
-                if block is not None:
-                    b = b | 1
-        for row in self.cur_block_grid_pos:
-            for block in row:
-                b = b << 1
-                if block is not None:
-                    b = b | 1
-        return str(b)
+    def save(self, name):
+        model.save_weights(name)
     
-    def get_q_table(self):
-        return self.q_table
+    def run(self):
+        EPISODES = 1000
+        for e in range(EPISODES):
+            state = self.env.reset()
+            state = np.reshape(state, [1, 10, 18])
+            print(state.shape) 
+            done = False
+            i = 0
+            while not done:
+                self.env.render()
+                action = self.act(state)
+                next_state, reward, done = self.env.step(action)
+                next_state = np.reshape(next_state, [1, 10, 18])
+                if not done or i == self.env._max_episode_steps - 1:
+                    reward = reward
+                else:
+                    reward = -100
+                self.remember(state, action, reward, next_state, done)
+                state = next_state
+                i += 1
     
-    def write_q_table(self):
-        self.q_table.to_csv("q_table.csv")
+            print("episode: {}/{}, score: {}, e: {:.2}".format(e, EPISODES, i, self.epsilon))
+            if len(self.memory) > self.train_start:
+                self.train()
+            if e % 50 == 0:
+                self.save("weights.h5")
+            
