@@ -11,6 +11,8 @@ class TetrisEnvironment(gym.Env):
         self.action_space = np.array(["moveLeft", "moveRight", "rotate", "moveDown"])
         self._max_episode_steps = 1000  
         self.game_controller = game_controller
+        self.grid_width = 10
+        self.grid_height = 18
         self.observation_space = spaces.Box(0, 1, shape=(self.grid_height, self.grid_width), dtype=np.float32)
 
     def reset(self):
