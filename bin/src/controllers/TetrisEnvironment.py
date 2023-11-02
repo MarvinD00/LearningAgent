@@ -11,21 +11,25 @@ class TetrisEnvironment(gym.Env):
         self.action_space = np.array(["moveLeft", "moveRight", "rotate", "moveDown"])
         self._max_episode_steps = 1000  
         self.game_controller = game_controller
-        self.observation_space =  np.array(self.game_controller.tetrimino_controller.block_grid_arr)
+        self.observation_space = spaces.Box(0, 1, shape=(self.grid_height, self.grid_width), dtype=np.float32)
 
     def reset(self):
         # Reset the game controller
         self.game_controller.reset()
-
+        obs = self.get_observation()
         # Return the initial observation
-        return self.game_controller.tetrimino_controller.block_grid_arr
+        return obs
 
     def step(self, action):
         # Execute one time step within the environment
         reward,done = self.game_controller.step(action)
-        
-        return self.game_controller.tetrimino_controller.block_grid_arr, reward, done
+        obs = self.get_observation()
+        return obs, reward, done
 
     def render(self, mode='human'):
         # Render the game controller
         return self.game_controller.render()
+
+    def get_observation(self):
+        # Get the observation from the game controller
+        return self.game_controller.tetrimino_controller.block_grid_arr
