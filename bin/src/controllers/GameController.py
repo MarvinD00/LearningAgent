@@ -1,8 +1,5 @@
 import pygame
-import pandas as pd
 from . import TetriminoController
-from . import AgentController as ac
-import random
 
 class GameController:
 
