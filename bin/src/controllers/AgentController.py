@@ -8,7 +8,7 @@ import random
 model = Sequential()
 model.add(Dense(32, input_shape=(10,18), activation="relu"))
 model.add(Dense(32, activation="relu"))
-model.add(Dense(18, activation="linear")) 
+model.add(Dense(4, activation="linear")) 
 model.compile(loss="mse", optimizer="adam", metrics=["accuracy"])
 
 # define the agent
@@ -27,9 +27,23 @@ class Agent:
 
     def act(self, state):
         if np.random.rand() <= self.epsilon:
-            return random.choice(self.env.action_space)
+            return self.env.action_space.sample()
         else:
-            return np.argmax(model.predict(state))
+            q_values = model.predict(state)[0, -1, :]
+            max_positive_value = None
+            max_positive_index = None
+
+            for action, q_value in enumerate(q_values):
+                if q_value > 0:  # Überprüfen, ob der Q-Wert positiv ist
+                    if max_positive_value is None or q_value > max_positive_value:
+                        max_positive_value = q_value
+                        max_positive_index = action
+
+            if max_positive_index is not None:
+                return max_positive_index
+            else:
+                # Wenn es keine positiven Q-Werte gibt, wähle zufällig
+                return self.env.action_space.sample()
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
@@ -40,19 +54,20 @@ class Agent:
         batch_size = min(self.batch_size, len(self.memory))
         mini_batch = random.sample(self.memory, batch_size)
         update_input = np.zeros((batch_size, 10, 18))
-        update_target = np.zeros((batch_size, 10, 18))
-        
+        update_target = np.zeros((batch_size, 10, 4))
+
         for i in range(batch_size):
             state, action, reward, next_state, done = mini_batch[i]
             target = reward
 
             if not done:
-                target = (reward + self.gamma * np.amax(model.predict(next_state)))
+                next_state_q_values = model.predict(next_state)
+                target = reward + self.gamma * np.amax(next_state_q_values)
 
             update_input[i] = state
-            update_target[i] = model.predict(state)
-            position = np.where(self.env.action_space == action)[0]
-            update_target[i][position] = target
+            update_target[i] = model.predict(state)[:, :, :4]
+            position = action 
+            update_target[i][:, position] = target
 
         model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
 
@@ -67,7 +82,7 @@ class Agent:
         model.save_weights(name)
     
     def run(self):
-        EPISODES = 1000
+        EPISODES = 100000
         for e in range(EPISODES):
             state = self.env.reset()
             state = np.reshape(state, [1, 10, 18])

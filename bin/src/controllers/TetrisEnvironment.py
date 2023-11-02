@@ -2,13 +2,19 @@ import gymnasium  as gym
 import numpy as np
 from gymnasium import spaces
 
+action_dict = {
+    0: "moveLeft",
+    1: "moveRight",
+    2: "rotate",
+    3: "moveDown"
+}
+
 class TetrisEnvironment(gym.Env):
     def __init__(self, game_controller):
         super(TetrisEnvironment, self).__init__()
 
         # Define your action and observation space
         self.action_space = spaces.Discrete(4) 
-        self.action_space = np.array(["moveLeft", "moveRight", "rotate", "moveDown"])
         self._max_episode_steps = 1000  
         self.game_controller = game_controller
         self.grid_width = 10
@@ -24,7 +30,8 @@ class TetrisEnvironment(gym.Env):
 
     def step(self, action):
         # Execute one time step within the environment
-        reward,done = self.game_controller.step(action)
+        action_name = action_dict[action]
+        reward,done = self.game_controller.step(action_name)
         obs = self.get_observation()
         return obs, reward, done
 
