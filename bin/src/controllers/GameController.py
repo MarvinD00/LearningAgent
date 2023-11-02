@@ -28,6 +28,7 @@ class GameController:
                 return 0,True
             if event.type == TetriminoController.STOP_MOVE_EVENT:
                 self.tetrimino_controller.new_tetrimino()
+                reward = self.getPunishment()
             if event.type == TetriminoController.TETRIS_EVENT:
                 self.score += 100
             if event.type == TetriminoController.TETRIS_COMBO_DOUBLE_EVENT:
@@ -47,10 +48,16 @@ class GameController:
                 self.tetrimino_controller.move_down()
             case _:
                 print("Invalid action")
-        reward = self.score
         return reward,done
             
     def render(self):
         self.screen.fill("purple")
         self.tetrimino_controller.draw()
         pygame.display.flip()
+
+    def getPunishment(self):
+        holes = self.tetrimino_controller.get_holes()
+        towers = self.tetrimino_controller.get_towers()
+        bumpiness = self.tetrimino_controller.get_bumpiness()
+        punishment = -0.05 * holes - 0.07 * bumpiness - 0.03 * towers
+        return punishment

@@ -160,3 +160,41 @@ class TetriminoController:
                     print("none ", end="")
             print("")
         print("")
+
+    def get_holes(self):
+        holes = 0
+        for col in range(len(self.block_grid[0])):
+            found_block = False
+            for row in range(len(self.block_grid)):
+                if (self.block_grid[row][col] is not None):
+                    found_block = True
+                elif (found_block):
+                    holes += 1
+        return holes
+    
+    def get_towers(self):
+        towers = 0
+        for col in range(len(self.block_grid[0])):
+            found_block = False
+            for row in range(len(self.block_grid)):
+                if (self.block_grid[row][col] is not None):
+                    found_block = True
+                elif (found_block):
+                    towers += 1
+        return towers
+    
+    def get_bumpiness(self):
+        bumpiness = 0
+        for col in range(len(self.block_grid[0]) - 1):
+            height1 = 0
+            height2 = 0
+            for row in range(len(self.block_grid)):
+                if (self.block_grid[row][col] is not None):
+                    height1 = len(self.block_grid) - row
+                    break
+            for row in range(len(self.block_grid)):
+                if (self.block_grid[row][col + 1] is not None):
+                    height2 = len(self.block_grid) - row
+                    break
+            bumpiness += abs(height1 - height2)
+        return bumpiness
