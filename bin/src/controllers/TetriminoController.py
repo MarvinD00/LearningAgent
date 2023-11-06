@@ -18,7 +18,8 @@ class TetriminoController:
         self.fall_interval = 200
         self.block_grid = []
         self.cur_block_grid_pos = []
-        self.block_grid_arr = np.array([[0 for i in range (10)] for j in range (18)])
+        self.cur_block_grid_pos_arr = np.zeros(shape=(18,10), dtype=np.int32)
+        self.block_grid_arr = np.zeros(shape=(18,10), dtype=np.int32)
 
         # Initialize the block grid
         for i in range(self.screen.get_height() // self.tetrimino.block_size):
@@ -86,6 +87,13 @@ class TetriminoController:
                     self.block_grid_arr[i][j] = 1
                 else:
                     self.block_grid_arr[i][j] = 0
+        # put all blocks into cur_block_grid_pos_arr as 1
+        for i in range(len(self.block_grid)):
+            for j in range(len(self.block_grid[i])):
+                if self.block_grid[i][j] is not None:
+                    self.cur_block_grid_pos_arr[i][j] = 1
+                else:
+                    self.cur_block_grid_pos_arr[i][j] = 0
 
     def update_block_grid(self):
         # add self.tetrimino to block grid
@@ -198,3 +206,4 @@ class TetriminoController:
                     break
             bumpiness += abs(height1 - height2)
         return bumpiness
+    
