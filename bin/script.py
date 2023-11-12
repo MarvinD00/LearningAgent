@@ -2,13 +2,10 @@ import pygame
 from src.Objects import Tetrimino as Tetrimino
 from src.controllers import TetriminoController as TetriminoController
 from src.controllers import GameController as GameController
+from src import TetrisAgent as Agent
 
-# pygame setup
-pygame.init()
-screen = pygame.display.set_mode((400, 720))
-pygame.display.set_caption("Tetris Learner")
+agent = Agent.TetrisAgent()
 
-# game loop
-GameController = GameController.GameController(screen)
+agent.train()
 
 pygame.quit()
