@@ -2,7 +2,7 @@ import pygame
 from src.controllers import TetriminoController
 import numpy as np
 
-SPEED = 30 # speed (number between 1-60)
+SPEED = 55 # speed (number between 1-60)
 
 class TetrisEnvironment:
 
@@ -14,13 +14,14 @@ class TetrisEnvironment:
         self.dt = 0
         self.clock = pygame.time.Clock()
         self.score = 0
-        self.last_punishment = 0
 
     def reset(self):
         self.score = 0
-        self.last_score = 0
         self.tetrimino_controller = TetriminoController.TetriminoController(self.screen)
         self.dt = 0
+
+    def get_reward(self):
+        return self.tetrimino_controller.get_reward()
 
     def get_state(self):
         block_grid = self.tetrimino_controller.block_grid_arr
@@ -32,28 +33,29 @@ class TetrisEnvironment:
     
     def step(self, action):
 
-        self.reward = 0
+        reward = self.get_reward()
 
         is_over = False
+        # event handling, gets all event from the event queue
         for event in pygame.event.get():
             if event.type == pygame.QUIT or event.type == TetriminoController.END_GAME_EVENT:
                 is_over = True
-                self.reward = -100
+                reward = -100
                 self.reset()
             if event.type == TetriminoController.STOP_MOVE_EVENT:
                 self.tetrimino_controller.new_tetrimino()
             if event.type == TetriminoController.TETRIS_EVENT:
                 self.score += 100
-                self.reward += 10
+                reward += 10
             if event.type == TetriminoController.TETRIS_COMBO_DOUBLE_EVENT:
                 self.score += 250
-                self.reward += 25
+                reward += 25
             if event.type == TetriminoController.TETRIS_COMBO_TRIPLE_EVENT:
                 self.score += 400
-                self.reward += 40
+                reward += 40
             if event.type == TetriminoController.TETRIS_COMBO_QUADRUPLE_EVENT:
                 self.score += 600
-                self.reward += 60
+                reward += 60
         
         match(action):
             case 0: self.tetrimino_controller.move_left()
@@ -90,4 +92,4 @@ class TetrisEnvironment:
         # independent physics.
         dt = self.clock.tick(60) / 1000
 
-        return self.reward, is_over, self.score
+        return reward, is_over, self.score

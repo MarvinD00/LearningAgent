@@ -152,3 +152,29 @@ class TetriminoController:
             block_grid[block.rect.y // self.tetrimino.block_size * 10 + block.rect.x // self.tetrimino.block_size] = 1
 
         return block_grid
+    
+    def get_heights(self):
+        heights = np.zeros(shape=(10), dtype=int)
+        for col in range(len(self.block_grid[0])):
+            for row in range(len(self.block_grid)):
+                if(self.block_grid[row][col] is not None):
+                    heights[col] = len(self.block_grid) - row
+                    break
+        return heights
+    
+    def number_of_blocks(self):
+        blocks = 0
+        for row in range(len(self.block_grid)):
+            for col in range(len(self.block_grid[row])):
+                if(self.block_grid[row][col] is not None):
+                    blocks += 1
+        return blocks
+
+    def get_reward(self):
+        reward = 0
+        heights = self.get_heights()
+        num_blocks = self.number_of_blocks()
+        highest = np.max(heights)
+        best_possible = highest * 9
+
+        return -(best_possible - num_blocks)
