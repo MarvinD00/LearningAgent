@@ -15,7 +15,7 @@ class TetrisAgent:
         self.number_of_games = 0
         self.epsilon = 0
         self.gamma = 0.9
-        self.model = Linear_QNet(360,256,3)
+        self.model = Linear_QNet(360,256,4)
         self.trainer = QTrainer(self.model, gamme=self.gamma, learning_rate=LEARNING_RATE)
         self.memory = deque(maxlen=MAX_MEMORY)
         self.environment = te.TetrisEnvironment()
@@ -43,7 +43,7 @@ class TetrisAgent:
         self.epsilon = 80 - self.number_of_games
         final_move = ...
         if((random.randint(0,200)) < self.epsilon):
-            move = random.randint(0,4)
+            move = random.randint(0,3)
         else:
             state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0)
