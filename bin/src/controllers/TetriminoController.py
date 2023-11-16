@@ -144,3 +144,11 @@ class TetriminoController:
                     print("none ", end="")
             print("")
         print("")
+
+    def get_tetrimino(self):
+        block_grid = np.zeros(shape=(180), dtype=int)
+
+        for block in self.tetrimino.blocks:
+            block_grid[block.rect.y // self.tetrimino.block_size * 10 + block.rect.x // self.tetrimino.block_size] = 1
+
+        return block_grid

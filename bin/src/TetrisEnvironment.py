@@ -1,5 +1,6 @@
 import pygame
 from src.controllers import TetriminoController
+import numpy as np
 
 SPEED = 30 # speed (number between 1-60)
 
@@ -22,7 +23,12 @@ class TetrisEnvironment:
         self.dt = 0
 
     def get_state(self):
-        return self.tetrimino_controller.block_grid_arr
+        block_grid = self.tetrimino_controller.block_grid_arr
+        tetrimino_arr = self.tetrimino_controller.get_tetrimino()
+
+        block_grid = np.append(block_grid, tetrimino_arr)
+
+        return block_grid
     
     def step(self, action):
 
