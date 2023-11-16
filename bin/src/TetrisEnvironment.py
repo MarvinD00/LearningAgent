@@ -41,7 +41,6 @@ class TetrisEnvironment:
             if event.type == pygame.QUIT or event.type == TetriminoController.END_GAME_EVENT:
                 is_over = True
                 reward = -100
-                self.reset()
             if event.type == TetriminoController.STOP_MOVE_EVENT:
                 self.tetrimino_controller.new_tetrimino()
             if event.type == TetriminoController.TETRIS_EVENT:
