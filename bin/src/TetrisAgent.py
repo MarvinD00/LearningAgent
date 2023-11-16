@@ -14,7 +14,7 @@ class TetrisAgent:
     def __init__(self):
         self.number_of_games = 0
         self.epsilon = 0
-        self.gamma = 0.9
+        self.gamma = 0.4
         self.model = Linear_QNet(360,256,4)
         self.trainer = QTrainer(self.model, gamme=self.gamma, learning_rate=LEARNING_RATE)
         self.memory = deque(maxlen=MAX_MEMORY)
