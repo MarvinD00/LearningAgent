@@ -60,6 +60,7 @@ class TetrisEnvironment:
             case 0: self.tetrimino_controller.move_left()
             case 1: self.tetrimino_controller.move_right()
             case 2: self.tetrimino_controller.rotate()
+            case 3: do_nothing = True
             case _: ValueError("Invalid action")
 
         # fill the screen with a color to wipe away anything from last frame
