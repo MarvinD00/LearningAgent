@@ -52,17 +52,8 @@ class TetrisEnvironment:
         match(action):
             case 0: self.tetrimino_controller.move_left()
             case 1: self.tetrimino_controller.move_right()
-            case 2: self.tetrimino_controller.move_down()
-            case 3: self.tetrimino_controller.rotate()
+            case 2: self.tetrimino_controller.rotate()
             case _: ValueError("Invalid action")
-        
-        # after we move we get the reward
-        punishment = self.tetrimino_controller.get_predicted_punishment()
-        # last punishmen = -0.1
-        # punishment = 0.1
-        
-        self.reward = punishment + self.last_punishment
-        self.last_punishment = punishment
 
         # fill the screen with a color to wipe away anything from last frame
         self.screen.fill("purple")

@@ -41,44 +41,6 @@ class TetriminoController:
         else:
             self.land()
         self.update_block_grid_arr()
-
-    def get_predicted_punishment(self):
-        # create a new tetrimino and move it down until it collides with something
-        # after it collides we know where it would land if we "hard dropped"
-        new_x = self.tetrimino.x
-        new_y = self.tetrimino.y
-        testrimino = Tetrimino.Tetrimino(new_x, new_y)
-        while(True):
-            if all(self.is_valid_move(block.rect.x, block.rect.y + self.tetrimino.block_size) for block in testrimino.blocks):
-                testrimino.move("down")
-            else:
-                break
-        temp_block_grid = []
-        for i in range(20):
-            temp_block_grid.append(
-                [None] * (12))
-
-        for block in testrimino.blocks:
-            try:
-                temp_block_grid[block.rect.y // self.tetrimino.block_size][block.rect.x //
-                                                                       self.tetrimino.block_size] = block
-            except IndexError:
-                print("--------------------")
-                print("Block out of bounds ::UNKNOWN ERROR::")
-                print("Block y pos was: ", block.rect.y // self.tetrimino.block_size)
-                print("Block x Pos was: ", block.rect.x // self.tetrimino.block_size)
-                print("--------------------")
-
-        del testrimino
-        # get the holes, towers, and bumpiness of the block grid
-        holes = self.get_holes(temp_block_grid)
-        towers = self.get_towers(temp_block_grid)
-        bumpiness = self.get_bumpiness(temp_block_grid)
-
-        del temp_block_grid
-        # calculate the score of the move
-        score = -0.05 * holes - 2 * towers - 0.03 * bumpiness
-        return score
     
     def rotate(self):
         # Temporarily rotate the tetrimino to check if the rotation is valid
