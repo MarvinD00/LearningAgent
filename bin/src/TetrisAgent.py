@@ -16,7 +16,7 @@ class TetrisAgent:
 		self.epsilon = 0
 		self.gamma = 0.4
 		self.model = Linear_QNet(360,256,4)
-		self.trainer = QTrainer(self.model, gamme=self.gamma, learning_rate=LEARNING_RATE)
+		self.trainer = QTrainer(self.model, gamma=self.gamma, learning_rate=LEARNING_RATE)
 		self.memory = deque(maxlen=MAX_MEMORY)
 		self.environment = te.TetrisEnvironment()
 

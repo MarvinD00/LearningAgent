@@ -21,13 +21,13 @@ class Linear_QNet(nn.Module):
 			os.makedirs(model_folder_path)
 
 		file_name = os.path.join(model_folder_path, file_name)
-		torch.save(self.state_dict, file_name)
+		torch.save(self.state_dict(), file_name)
 
 	
 class QTrainer:
-	def __init__(self, model, learning_rate, gamme):
+	def __init__(self, model, learning_rate, gamma):
 		self.learning_rate = learning_rate
-		self.gamme = gamme
+		self.gamma = gamma
 		self.model = model
 		self.optimizer = optim.Adam(model.parameters(), lr=self.learning_rate)
 		self.criterion = nn.MSELoss()
@@ -38,26 +38,25 @@ class QTrainer:
 		action = torch.tensor(action, dtype=torch.long)
 		reward = torch.tensor(reward, dtype=torch.float)
 
-		if(len(state.shape) == 1):
-			# add batch dimension
+		if len(state.shape) == 1:
 			state = torch.unsqueeze(state, 0)
 			next_state = torch.unsqueeze(next_state, 0)
 			action = torch.unsqueeze(action, 0)
 			reward = torch.unsqueeze(reward, 0)
 			done = (done, )
 		
-		prediction = self.model(state)
+		pred = self.model(state)
 
-		target = prediction.clone()
+		target = pred.clone()
 		for index in range(len(done)):
 			Q_new = reward[index]
 			if not done[index]:
-				Q_new = reward[index] + self.gamme * torch.max(self.model(next_state[index]))
+				Q_new = reward[index] + self.gamma * torch.max(self.model(next_state[index]))
 
-			target[index][torch.argmax(action[index]).item()] = Q_new
+			target[index][action[index].item()] = Q_new
 
 		self.optimizer.zero_grad()
-		loss = self.criterion(target, prediction)
+		loss = self.criterion(target, pred)
 		loss.backward()
 
 		self.optimizer.step()

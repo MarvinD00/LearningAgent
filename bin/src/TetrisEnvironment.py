@@ -2,8 +2,6 @@ import pygame
 from src.controllers import TetriminoController
 import numpy as np
 
-SPEED = 55 # speed (number between 1-60)
-
 class TetrisEnvironment:
 
 	def __init__(self):
@@ -11,14 +9,13 @@ class TetrisEnvironment:
 		self.screen = pygame.display.set_mode((400, 720))
 		pygame.display.set_caption("Tetris Learner")
 		self.tetrimino_controller = TetriminoController.TetriminoController(self.screen)
-		self.dt = 0
 		self.clock = pygame.time.Clock()
 		self.score = 0
 
 	def reset(self):
 		self.score = 0
 		self.tetrimino_controller = TetriminoController.TetriminoController(self.screen)
-		self.dt = 0
+		pygame.event.clear()
 
 	def get_reward(self):
 		return self.tetrimino_controller.get_reward()
@@ -26,10 +23,9 @@ class TetrisEnvironment:
 	def get_state(self):
 		block_grid = self.tetrimino_controller.block_grid_arr
 		tetrimino_arr = self.tetrimino_controller.get_tetrimino()
-
-		block_grid = np.append(block_grid, tetrimino_arr)
-
-		return block_grid
+		
+		state = np.concatenate((block_grid, tetrimino_arr), axis=0)
+		return state
 	
 	def step(self, action):
 
@@ -67,13 +63,10 @@ class TetrisEnvironment:
 		self.screen.fill("purple")
 
 		# every second increase score by 10 and move down
-		self.dt += 1
-		if self.dt >= 61-SPEED:
-			self.score += 1
-			self.dt = 0
-			self.tetrimino_controller.move_down()
-			self.label = self.myfont.render(
-				"Score: " + str(self.score), 1, (255, 255, 0))
+
+		self.score += 1
+		self.tetrimino_controller.move_down()
+
 		# draw label
 		# render text
 		self.myfont = pygame.font.Font(None, 30)
@@ -86,10 +79,5 @@ class TetrisEnvironment:
 
 		# flip() the display to put your work on screen
 		pygame.display.flip()
-
-		# limits FPS to 60
-		# dt is delta time in seconds since last frame, used for framerate-
-		# independent physics.
-		dt = self.clock.tick(60) / 1000
 
 		return reward, is_over, self.score
