@@ -203,15 +203,6 @@ class TetriminoController:
 				if(self.block_grid[row][col] is not None):
 					blocks += 1
 		return blocks
-
-	def get_reward(self):
-		reward = 0
-		heights = self.get_heights()
-		num_blocks = self.number_of_blocks()
-		highest = np.max(heights)
-		best_possible = highest * 9
-
-		return -(best_possible - num_blocks)
 	
 	def get_bumpiness(self):
 		heights = self.get_heights()
