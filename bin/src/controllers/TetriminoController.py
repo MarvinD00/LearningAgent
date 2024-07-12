@@ -85,17 +85,12 @@ class TetriminoController:
 		highest = np.max(heights)
 		best_possible = highest * 9
 
-		# Reward for clearing lines
-		lines_cleared = self.check_lines_cleared()
-		reward += lines_cleared * 10
+		reward -= (best_possible - num_blocks)
+		reward -= self.get_bumpiness()
 		
-		# Penalty for holes
 		holes = self.count_holes()
-		reward -= holes * 5
-		
-		# Penalty for uneven column heights
-		reward -= np.std(heights)
-		
+		reward -= holes * 2
+
 		return reward
 	
 	def check_lines_cleared(self):
@@ -217,3 +212,10 @@ class TetriminoController:
 		best_possible = highest * 9
 
 		return -(best_possible - num_blocks)
+	
+	def get_bumpiness(self):
+		heights = self.get_heights()
+		bumpiness = 0
+		for i in range(len(heights) - 1):
+			bumpiness += abs(heights[i] - heights[i + 1])
+		return bumpiness
