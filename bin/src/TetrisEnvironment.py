@@ -29,7 +29,7 @@ class TetrisEnvironment:
 	
 	def step(self, action):
 
-		reward = -1
+		reward = self.get_reward()
 
 		is_over = False
 		# event handling, gets all event from the event queue
@@ -41,16 +41,16 @@ class TetrisEnvironment:
 				self.tetrimino_controller.new_tetrimino()
 			if event.type == TetriminoController.TETRIS_EVENT:
 				self.score += 100
-				reward = 1
+				reward = 1000
 			if event.type == TetriminoController.TETRIS_COMBO_DOUBLE_EVENT:
 				self.score += 250
-				reward = 2
+				reward = 2000
 			if event.type == TetriminoController.TETRIS_COMBO_TRIPLE_EVENT:
 				self.score += 400
-				reward = 4
+				reward = 4000
 			if event.type == TetriminoController.TETRIS_COMBO_QUADRUPLE_EVENT:
 				self.score += 600
-				reward = 6
+				reward = 6000
 		
 		match(action):
 			case 0: self.tetrimino_controller.move_left()
