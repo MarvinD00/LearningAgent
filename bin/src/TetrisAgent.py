@@ -8,6 +8,8 @@ from .Model import Linear_QNet, QTrainer
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LEARNING_RATE = 0.001
+EPSILON_START = 1000
+EPSILON_END = 20
 
 class TetrisAgent:
 	
@@ -40,9 +42,9 @@ class TetrisAgent:
 		self.trainer.train_step(state, action, reward, next_state, done)
 
 	def get_action(self, state):
-		self.epsilon = 80 - self.number_of_games
+		self.epsilon = EPSILON_START - self.number_of_games + EPSILON_END
 		final_move = ...
-		if((random.randint(0,200)) < self.epsilon):
+		if((random.randint(0,EPSILON_START)) < self.epsilon):
 			move = random.randint(0,3)
 		else:
 			state0 = torch.tensor(state, dtype=torch.float)
