@@ -4,6 +4,7 @@ import random
 from . import TetrisEnvironment as te
 from collections import deque
 from .Model import Linear_QNet, QTrainer
+from .helper import plot
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
