@@ -80,19 +80,23 @@ class TetriminoController:
 	
 	def get_reward(self):
 		reward = 0
-		heights = self.get_heights()
-		num_blocks = self.number_of_blocks()
-		highest = np.max(heights)
-		best_possible = highest * 9
 
-		reward -= (best_possible - num_blocks)
-		reward -= self.get_bumpiness()
+		predicted_block_grid = self.get_final_position()
+
+		# Calculate the reward
+
+		holes = self.count_holes(predicted_block_grid)
+		heights = self.get_heights(predicted_block_grid)
+		blocks = self.number_of_blocks(predicted_block_grid)
+
+		reward -= 10 * holes
 		
-		holes = self.count_holes()
-		reward -= holes * 2
+		reward -= 5 * sum(heights)
+
+		reward += 10 * blocks
 
 		return reward
-	
+
 	def check_lines_cleared(self):
 		lines_cleared = 0
 		for row in self.block_grid:
@@ -100,16 +104,33 @@ class TetriminoController:
 				lines_cleared += 1
 		return lines_cleared
 	
-	def count_holes(self):
+	def count_holes(self, block_grid):
 		holes = 0
-		for col in range(len(self.block_grid[0])):
+		for col in range(len(block_grid[0])):
 			block_found = False
-			for row in range(len(self.block_grid)):
-				if self.block_grid[row][col] is not None:
+			for row in range(len(block_grid)):
+				if block_grid[row][col] is not None:
 					block_found = True
 				elif block_found:
 					holes += 1
 		return holes
+
+	def get_heights(self, block_grid):
+		heights = np.zeros(shape=(len(block_grid[0])), dtype=int)
+		for col in range(len(block_grid[0])):
+			for row in range(len(block_grid)):
+				if block_grid[row][col] is not None:
+					heights[col] = len(block_grid) - row
+					break
+		return heights
+
+	def number_of_blocks(self, block_grid):
+		blocks = 0
+		for row in range(len(block_grid)):
+			for col in range(len(block_grid[row])):
+				if block_grid[row][col] is not None:
+					blocks += 1
+		return blocks
 
 	def update_block_grid(self):
 		# add self.tetrimino to block grid
@@ -186,27 +207,28 @@ class TetriminoController:
 			block_grid[block.rect.y // self.tetrimino.block_size * 10 + block.rect.x // self.tetrimino.block_size] = 1
 
 		return block_grid
-	
-	def get_heights(self):
-		heights = np.zeros(shape=(10), dtype=int)
-		for col in range(len(self.block_grid[0])):
-			for row in range(len(self.block_grid)):
-				if(self.block_grid[row][col] is not None):
-					heights[col] = len(self.block_grid) - row
-					break
-		return heights
-	
-	def number_of_blocks(self):
-		blocks = 0
-		for row in range(len(self.block_grid)):
-			for col in range(len(self.block_grid[row])):
-				if(self.block_grid[row][col] is not None):
-					blocks += 1
-		return blocks
-	
-	def get_bumpiness(self):
-		heights = self.get_heights()
-		bumpiness = 0
-		for i in range(len(heights) - 1):
-			bumpiness += abs(heights[i] - heights[i + 1])
-		return bumpiness
+
+	def get_final_position(self):
+		original_blocks = self.tetrimino.blocks[:]
+		original_y_positions = [block.rect.y for block in original_blocks]
+
+		while all(self.is_valid_move(block.rect.x, block.rect.y + self.tetrimino.block_size)
+					for block in self.tetrimino.blocks):
+			for block in self.tetrimino.blocks:
+				block.rect.y += self.tetrimino.block_size
+			
+		final_positions = [(block.rect.x, block.rect.y) for block in self.tetrimino.blocks]
+
+		# Restore original positions
+		for block, y_pos in zip(self.tetrimino.blocks, original_y_positions):
+			block.rect.y = y_pos
+
+		# Restore original blocks
+		self.tetrimino.blocks = original_blocks
+
+		# Convert positions to block grid
+		final_block_grid = [[None] * (self.screen.get_width() // self.tetrimino.block_size) for _ in range(self.screen.get_height() // self.tetrimino.block_size)]
+		for x, y in final_positions:
+			final_block_grid[y // self.tetrimino.block_size][x // self.tetrimino.block_size] = 1
+
+		return final_block_grid
