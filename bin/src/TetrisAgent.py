@@ -54,29 +54,26 @@ class TetrisAgent:
 		return move
 
 	def train(self):
+		plot_avg_rewards = []
+		plot_mean_avg_rewards = []
+		total_avg_rewards = 0
 		record = 0
 		game = te.TetrisEnvironment()
 		total_rewards = []
 		while True:
-			# get old state
 			old_state = self.get_state()
 
-			# get move
 			final_move = self.get_action(old_state)
 
-			# perform move and get new state
 			reward, done, score = game.step(final_move)
 			total_rewards.append(reward)
 			new_state = self.get_state()
 
-			# train short memory
 			self.train_short_memory(old_state, final_move, reward, new_state, done)
 
-			# remember
 			self.remember(old_state, final_move, reward, new_state, done)
 
 			if done:
-				# train long memory
 				game.reset()
 				self.number_of_games += 1
 				self.train_long_memory()
@@ -85,6 +82,13 @@ class TetrisAgent:
 					record = score
 					self.model.save()
 
+				avg_reward = sum(total_rewards)/len(total_rewards)
 				print('Game', self.number_of_games, 'Score', score, 'Record:', record, end="")
-				print(" avg_reward: " + str(round(sum(total_rewards)/len(total_rewards), 2)))
+				print(" avg_reward: " + str(avg_reward))
 				total_rewards = []
+
+				plot_avg_rewards.append(avg_reward)
+				total_avg_rewards += avg_reward
+				mean_avg_rewards = total_avg_rewards / self.number_of_games
+				plot_mean_avg_rewards.append(mean_avg_rewards)
+				plot(plot_avg_rewards, plot_mean_avg_rewards)
